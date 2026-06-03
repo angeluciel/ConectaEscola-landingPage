@@ -38,6 +38,7 @@ export default function RootLayout({
   return (
     <html
       lang='en'
+      style={{ overflow: 'clip'}}
       className={`lenis ${instrumentSans.variable} ${geistMono.variable} ${headingFonts.variable} h-full antialiased`}
     >
       <body className='min-h-full flex flex-col'>

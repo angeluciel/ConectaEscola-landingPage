@@ -7,13 +7,19 @@ gsap.registerPlugin(useGSAP);
 type AnimatedPresenceProps = {
   show: boolean;
   children: React.ReactNode;
+  onExitComplete?: () => void;
 };
 
-export function AnimatedPresence({ show, children }: AnimatedPresenceProps) {
+export function AnimatedPresence({
+  show,
+  children,
+  onExitComplete,
+}: AnimatedPresenceProps) {
   const [shouldRender, setShouldRender] = useState(show);
   const container = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     if (show) setShouldRender(true);
   }, [show]);
 
@@ -22,19 +28,20 @@ export function AnimatedPresence({ show, children }: AnimatedPresenceProps) {
       const el = container.current;
       if (!el) return;
 
+      gsap.killTweensOf(el);
+
       if (show) {
-        gsap.fromTo(
-          el,
-          { opacity: 0, y: 24 },
-          { opacity: 1, y: 0, duration: 0.4, ease: 'power3.out' },
-        );
+        gsap.to(el, { opacity: 1, y: 0, duration: 0.4, ease: 'power3.out' });
       } else {
         gsap.to(el, {
           opacity: 0,
           y: 24,
           duration: 0.25,
           ease: 'power3.in',
-          onComplete: () => setShouldRender(false),
+          onComplete: () => {
+            setShouldRender(false);
+            onExitComplete?.();
+          },
         });
       }
     },
@@ -43,5 +50,9 @@ export function AnimatedPresence({ show, children }: AnimatedPresenceProps) {
 
   if (!shouldRender) return null;
 
-  return <div ref={container}>{children}</div>;
+  return (
+    <div ref={container} className='fixed inset-0 z-9999'>
+      {children}
+    </div>
+  );
 }

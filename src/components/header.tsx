@@ -1,4 +1,9 @@
+'use client';
 import Link from 'next/link';
+import { useLenis } from './providers/LenisProvider';
+import { useEffect, useRef, useState } from 'react';
+import gsap from 'gsap';
+import { useGSAP } from '@gsap/react';
 
 export type LinkType = {
   name: string;
@@ -9,26 +14,53 @@ interface HeaderProps {
   links: LinkType[];
 }
 
+gsap.registerPlugin(useGSAP);
+
 export default function HeroHeader({ links }: HeaderProps) {
+  const [show, setShow] = useState(true);
+  const lenis = useLenis();
+
+  const headerContainerRef = useRef<HTMLHeadingElement | null>(null);
+
+  useEffect(() => {
+    if (!lenis) return;
+
+    const unsubscribe = lenis.on('scroll', ({ direction }) => {
+      setShow((current) => {
+        const shouldShow = direction !== 1;
+
+        return current === shouldShow ? current : shouldShow;
+      });
+    });
+
+    return unsubscribe;
+  }, [lenis]);
+
+  useGSAP(() => {
+    gsap.to(headerContainerRef.current, {
+      y: show ? 0 : -100,
+      opacity: show ? 1 : 0,
+      duration: 0.375,
+    });
+  }, [show]);
+
   return (
-    <header className='flex justify-between items-top'>
-      <h1 className='font-bold uppercase text-5xl text-amber-100 font-heading-serif'>
+    <header
+      ref={headerContainerRef}
+      className='flex justify-start md:justify-between items-top w-dvw fixed z-9999 top-0 left-0 md:px-[clamp(4rem,8vw+4rem,8rem)]'
+    >
+      <h1 className='font-bold uppercase text-display text-amber-100 font-heading-serif'>
         conecta
-        <span className='font-black normal-case tracking-widest text-2xl'>
+        <span className='font-black normal-case tracking-widest text-heading'>
           escola
         </span>
       </h1>
-      <div className='flex text-lg gap-6 items-top font-sans'>
+      <div className='hidden md:flex text-body pt-2 gap-2 lg:gap-6 items-center lg:items-top font-sans font-medium'>
         {links.map((link) => (
           <Link key={link.href + link.name} href={link.href}>
             {link.name}
           </Link>
         ))}
-        <Link href={`/contatos`}>Alunos</Link>
-        <Link href={`/contatos`}>Professores</Link>
-        <Link href={`/contatos`}>Pais</Link>
-        <Link href={`/contatos`}>Sobre</Link>
-        <Link href={`/contatos`}>Contato</Link>
       </div>
     </header>
   );

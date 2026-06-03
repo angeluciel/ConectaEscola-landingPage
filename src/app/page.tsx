@@ -1,18 +1,27 @@
 'use client';
+import HeroHeader, { LinkType } from '@/components/header';
 import Hero from '@/components/hero';
+import { useLenis } from '@/components/providers/LenisProvider';
+import Scrollbar from '@/components/scrollbar';
 
 export default function Home() {
+  const l = useLenis()?.progress;
+
+  const headerLinks: LinkType[] = [
+    { name: 'Alunos', href: '/alunos' },
+    { name: 'Professores', href: '/alunos' },
+    { name: 'Pais', href: '/alunos' },
+    { name: 'Sobre', href: '/alunos' },
+    { name: 'Contato', href: '/alunos' },
+  ];
+
   return (
-    <div className='flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black'>
-      <main className='flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start'>
-        <div className='absolute top-0 left-0 w-full h-dvh bg-black/20'>
-          {/* <video
-            src={`https://randomimgs.blob.core.windows.net/random-imgs/clip-1.mp4`}
-            autoPlay
-            loop
-          /> */}
-          <Hero />
-        </div>
+    <div className='flex flex-col flex-1 items-center justify-center bg-background font-sans w-dvw'>
+      <HeroHeader links={headerLinks} />
+      <main className='flex w-full flex-col items-center justify-between sm:items-start bg-black/20 relative'>
+        <Scrollbar />
+        <Hero />
+        <section className='relative h-dvh'>{l}</section>
       </main>
     </div>
   );

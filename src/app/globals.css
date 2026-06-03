@@ -5,6 +5,30 @@
   --foreground: #171717;
 }
 
+/* typography */
+:root {
+  --text-xs: clamp(0.75rem, 0.7rem + 0.25vw, 0.875rem);
+  --text-sm: clamp(0.875rem, 0.825rem + 0.25vw, 1rem);
+  --text-base: clamp(1rem, 0.925rem + 0.375vw, 1.125rem);
+  --text-lg: clamp(1.125rem, 1rem + 0.6225vw, 1.375rem);
+  --text-xl: clamp(1.25rem, 1.1rem + 0.75vw, 1.625rem);
+  --text-2xl: clamp(1.5rem, 1.25rem + 1.25vw, 2rem);
+  --text-3xl: clamp(1.875rem, 1.5rem + 1.875vw, 2.625rem);
+  --text-4xl: clamp(2.25rem, 1.75rem + 2.5vw, 3.5rem);
+  --text-5xl: clamp(3rem, 2.25rem + 3.75vw, 4.5rem);
+  --text-10xl: clamp(4.5rem, 9vw, 13.5rem);
+}
+
+/* typography tokens */
+
+@theme {
+  --text-body: var(--text-base);
+  --text-caption: var(--text-sm);
+  --text-heading: var(--text-2xl);
+  --text-display: var(--text-4xl);
+  --text-hero: var(--text-10xl);
+}
+
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
@@ -19,6 +43,21 @@
   }
   .absolute-center {
     @apply absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2;
+  }
+  .lenis-scrollbar {
+    @apply fixed right-1.5 top-0 h-full w-4 z-9999 cursor-default;
+  }
+  .lenis-scrollbar__track {
+    @apply absolute inset-x-0 inset-y-1 bg-[color-mix(in_srgb,currentColor_8%,transparent)] rounded-[99px] opacity-0 transition-opacity duration-200 ease-out;
+  }
+  .lenis-scrollbar:hover .lenis-scrollbar__track {
+    opacity: 1;
+  }
+  .lenis-scrollbar__thumb {
+    @apply inset-x-1 rounded-[99px] bg-[color-mix(in_srgb,currentColor_30%,transparent)] opacity-0 [transition:opacity_300ms_ease,background_150ms_ease] cursor-grab active:cursor-grabbing active:bg-[color-mix(in_srgb,currentColor_50%,transparent)];
+  }
+  .lenis-scrollbar--active .lenis-scrollbar__thumb {
+    opacity: 1;
   }
 }
 
@@ -70,6 +109,12 @@ body {
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
 }
+
+* {
+  scrollbar-color: var(--color-amber-800) rgba(0, 0, 0, 0);
+}
+
+/* #region LOADER */
 
 .loading-body {
   --uib-size: 35px;
@@ -132,4 +177,19 @@ body {
   top: 0;
   left: 0;
   animation: wobble2 var(--uib-speed) infinite ease-in-out;
+}
+
+/* #endregion */
+
+html {
+  scrollbar-width: none !important;
+  -ms-overflow-style: none !important;
+}
+
+html::-webkit-scrollbar {
+  display: none !important;
+}
+
+html {
+  scrollbar-gutter: stable !important;
 }

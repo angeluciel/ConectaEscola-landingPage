@@ -1,3 +1,4 @@
+'use client';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useLenis } from './providers/LenisProvider';
 
@@ -117,14 +118,14 @@ export default function Scrollbar() {
   }
 
   return (
-    <div className='fixed top-1/2 right-4 z-9999 w-2 h-[min(50vh,28rem)] -translate-y-1/2 pointer-events-auto'>
+    <div className='fixed top-4 right-2 z-9999 w-2 h-dvh pointer-events-auto'>
       <div
-        className={`h-full w-full relative right-0 top-0 bg-transparent hover:bg-foreground blur-lg cursor-pointer`}
+        className={`h-full w-full relative right-0 top-0 bg-black/50 hover:bg-foreground/50 cursor-pointer`}
         ref={trackRef}
         onPointerDown={handleTrackPointerDown}
       >
         <div
-          className='absolute top-0 left-0 min-h-10 rounded-4xl bg-amber-800 cursor-grab touch-none will-change-[transform,height] active:cursor-grabbing'
+          className='absolute top-0 right-0 min-h-10 rounded-4xl bg-amber-800 cursor-grab touch-none will-change-[transform,height] active:cursor-grabbing z-9999'
           ref={thumbRef}
           onPointerDown={handleThumbPointerDown}
           onPointerMove={handleThumbPointerMove}

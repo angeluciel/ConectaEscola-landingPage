@@ -2,21 +2,51 @@
 import { useEffect, useRef, useState } from 'react';
 import gsap from 'gsap';
 import { useGSAP } from '@gsap/react';
-
 import { SplitText } from 'gsap/SplitText';
-import HeroHeader, { LinkType } from './header';
+import { usePreloader } from './providers/PreloaderContext';
 
+const PRELOAD_LIMIT = 2;
 const TOTAL_VIDEOS = 2;
 
 gsap.registerPlugin(useGSAP, SplitText);
 
+function waitForVideo(
+  video: HTMLVideoElement,
+  timeoutMs = 5000,
+): Promise<void> {
+  if (video.readyState >= HTMLMediaElement.HAVE_FUTURE_DATA) {
+    return Promise.resolve();
+  }
+
+  return new Promise<void>((resolve) => {
+    let done = false;
+    // eslint-disable-next-line prefer-const
+    let timeout: ReturnType<typeof setTimeout>;
+
+    const finish = () => {
+      if (done) return;
+      done = true;
+      clearTimeout(timeout);
+      video.removeEventListener('canplay', finish);
+      video.removeEventListener('loadeddata', finish);
+      video.removeEventListener('error', finish);
+      resolve();
+    };
+
+    video.addEventListener('canplay', finish);
+    video.addEventListener('loadeddata', finish);
+    video.addEventListener('error', finish);
+
+    timeout = setTimeout(finish, timeoutMs);
+  });
+}
+
 export default function Hero() {
   const [currentIndex, setCurrentIndex] = useState(1);
+  const { isReady, registerResource } = usePreloader();
 
   const container = useRef<HTMLDivElement>(null);
-  const subtitleRef = useRef<HTMLSpanElement>(null);
   const btnRef = useRef<HTMLButtonElement>(null);
-
   const videoRefs = useRef<(HTMLVideoElement | null)[]>([null, null]);
 
   const getVideoSrc = (index: number) =>
@@ -24,60 +54,71 @@ export default function Hero() {
 
   const nextIndex = (currentIndex % TOTAL_VIDEOS) + 1;
 
-  const handleEnded = () => {
-    const nextVideo = videoRefs.current[nextIndex - 1];
-    if (nextVideo) {
-      nextVideo.currentTime = 0;
-      nextVideo.play();
+  useEffect(() => {
+    videoRefs.current.slice(0, PRELOAD_LIMIT).forEach((video) => {
+      if (video) registerResource(waitForVideo(video));
+    });
+  }, []);
+
+  useEffect(() => {
+    if (!isReady) return;
+    const active = videoRefs.current[currentIndex - 1];
+    if (active) {
+      active.currentTime = 0;
+      active.play();
     }
+  }, [isReady, currentIndex]);
+
+  const handleEnded = () => {
+    const next = videoRefs.current[nextIndex - 1];
+    if (next) {
+      next.currentTime = 0;
+      next.play();
+    }
+
     setCurrentIndex(nextIndex);
   };
 
+  const entranceTl = useRef<gsap.core.Timeline | null>(null);
+
   useGSAP(
     () => {
-      const heroSplit = SplitText.create('#hero-txt', {
-        type: 'words, chars',
-      });
-      const btnSplit = SplitText.create('#btn-txt', {
-        type: 'words',
-      });
+      const heroSplit = SplitText.create('#hero-txt', { type: 'words, chars' });
+      const btnSplit = SplitText.create('#btn-txt', { type: 'words' });
 
-      gsap
-        .timeline()
+      entranceTl.current = gsap
+        .timeline({ paused: true })
         .from(heroSplit.chars, {
           y: -100,
           opacity: 0,
-          stagger: {
-            each: 0.05,
-            from: 'start',
-          },
+          stagger: { each: 0.05, from: 'start' },
           duration: 3,
           ease: 'power3.out',
         })
         .from(
           btnSplit.words,
           {
-            y: -60,
+            y: -33,
             opacity: 0,
             duration: 1.5,
-            stagger: 0.1,
-            ease: `power2.out`,
+            stagger: 0.2,
+            ease: 'power2.out',
           },
-          `-=2`,
+          '-=2',
         )
         .from(
           [btnRef.current],
-          {
-            opacity: 0,
-            duration: 2,
-            stagger: 0.075,
-            ease: `power2.out`,
-          },
+          { opacity: 0, duration: 2, stagger: 0.075, ease: 'power2.out' },
           '-=0.5',
         );
     },
     { scope: container },
   );
+
+  useEffect(() => {
+    if (!isReady) return;
+    entranceTl.current?.resume();
+  }, [isReady]);
 
   return (
     <section className={'relative h-dvh w-full overflow-x-hidden z-50'}>
@@ -97,7 +138,6 @@ export default function Hero() {
                     videoRefs.current[i] = el;
                   }}
                   src={getVideoSrc(index)}
-                  autoPlay={isActive}
                   muted
                   playsInline
                   onEnded={isActive ? handleEnded : undefined}
@@ -126,7 +166,6 @@ export default function Hero() {
               </h2>
               <div className='flex flex-col gap-4 items-start w-fit max-w-52 xl:max-w-64'>
                 <span
-                  ref={subtitleRef}
                   className='text-2xl font-sans w-full font-medium text-end'
                   id='btn-txt'
                 >

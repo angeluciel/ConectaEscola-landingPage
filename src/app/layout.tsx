@@ -8,6 +8,8 @@ import './globals.css';
 import 'lenis/dist/lenis.css';
 import { LenisProvider } from '@/components/providers/LenisProvider';
 import Preloader from '@/components/preLoader';
+import Scrollbar from '@/components/scrollbar';
+import { CustomScroll } from '@/components/CustomScroll';
 
 const geistMono = Geist_Mono({
   variable: '--font-geist-mono',
@@ -38,12 +40,15 @@ export default function RootLayout({
   return (
     <html
       lang='en'
-      style={{ overflow: 'clip'}}
+      style={{ overflow: 'clip' }}
       className={`lenis ${instrumentSans.variable} ${geistMono.variable} ${headingFonts.variable} h-full antialiased`}
     >
       <body className='min-h-full flex flex-col'>
-        <Preloader minLoadTime={1400}>
-          <LenisProvider>{children}</LenisProvider>
+        <Preloader minLoadTime={500}>
+          <LenisProvider>
+            <CustomScroll />
+            {children}
+          </LenisProvider>
         </Preloader>
       </body>
     </html>

@@ -1,47 +1,72 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { AnimatedPresence } from './providers/AnimatePresence';
+import {
+  useState,
+  useEffect,
+  createContext,
+  useContext,
+  useRef,
+  useCallback,
+} from 'react';
+import { useLenis } from './providers/LenisProvider';
+import { PreloaderContext } from './providers/PreloaderContext';
+import gsap from 'gsap';
+import { useGSAP } from '@gsap/react';
+
+gsap.registerPlugin(useGSAP);
 
 interface PreloaderProps {
   children: React.ReactNode;
   minLoadTime?: number;
 }
 
-function waitForVideo(video: HTMLVideoElement, timeoutMs = 5000) {
-  if (video.readyState >= HTMLMediaElement.HAVE_FUTURE_DATA) {
-    return Promise.resolve();
-  }
+interface OverlayProps {
+  show: boolean;
+  onExitComplete: () => void;
+}
 
-  return new Promise<void>((resolve) => {
-    let done = false;
-    // eslint-disable-next-line prefer-const
-    let timeout: ReturnType<typeof setTimeout>;
+function PreloaderOverlay({ show, onExitComplete }: OverlayProps) {
+  const [shouldRender, setShouldRender] = useState(true);
+  const containerRef = useRef<HTMLDivElement | null>(null);
+  const onExitCompleteRef = useRef(onExitComplete);
 
-    const finish = () => {
-      if (done) return;
-      done = true;
+  useEffect(() => {
+    onExitCompleteRef.current = onExitComplete;
+  }, [onExitComplete]);
 
-      clearTimeout(timeout);
-      video.removeEventListener('loadeddata', finish);
-      video.removeEventListener('canplay', finish);
-      video.removeEventListener('error', finish);
+  useGSAP(
+    () => {
+      const el = containerRef.current;
+      if (!el || show) return;
 
-      resolve();
-    };
+      gsap.killTweensOf(el);
 
-    video.addEventListener('loadeddata', finish);
-    video.addEventListener('canplay', finish);
-    video.addEventListener('error', finish);
+      gsap.to(el, {
+        yPercent: -100,
+        duration: 0.67,
+        ease: 'power1.in',
+        onComplete: () => {
+          setShouldRender(false);
+          onExitCompleteRef.current();
+        },
+      });
+    },
+    { dependencies: [show], scope: containerRef },
+  );
 
-    timeout = setTimeout(finish, timeoutMs);
+  if (!shouldRender) return null;
 
-    try {
-      video.load();
-    } catch {
-      finish();
-    }
-  });
+  return (
+    <div ref={containerRef} className='fixed inset-0 z-9999'>
+      <div className='flex h-dvh w-dvw items-center justify-center overflow-hidden bg-amber-100'>
+        <div className='loading-body'>
+          <div className='loading-dots' />
+          <div className='loading-dots' />
+          <div className='loading-dots' />
+        </div>
+      </div>
+    </div>
+  );
 }
 
 export default function Preloader({
@@ -49,67 +74,52 @@ export default function Preloader({
   minLoadTime = 800,
 }: PreloaderProps) {
   const [isLoading, setIsLoading] = useState(true);
+  const [isReady, setIsReady] = useState(false);
+
+  const registryRef = useRef<Promise<void>[]>([]);
+
+  const lenis = useLenis();
+
+  useEffect(() => {
+    document.documentElement.style.overflow = 'clip';
+  }, []);
+
+  const registerResource = useCallback((promise: Promise<void>) => {
+    registryRef.current.push(promise);
+  }, []);
 
   useEffect(() => {
     let cancelled = false;
-    let timeout: ReturnType<typeof setTimeout>;
-    let unlockTimeout: ReturnType<typeof setTimeout> | undefined;
-
-    const html = document.documentElement;
-
-    html.style.overflow = 'clip';
-
-    const initLoading = async () => {
+    const ticket = setTimeout(async () => {
       const start = performance.now();
 
-      const videos = Array.from(
-        document.querySelectorAll('video'),
-      ) as HTMLVideoElement[];
+      const promises = [...registryRef.current];
 
-      await Promise.all(videos.map((video) => waitForVideo(video)));
-
-      const elapsed = performance.now() - start;
-      const remaining = minLoadTime - elapsed;
-
-      if (remaining > 0) {
-        await new Promise((resolve) => setTimeout(resolve, remaining));
-      }
+      await Promise.all([
+        Promise.all(promises),
+        new Promise<void>((resolve) => setTimeout(resolve, minLoadTime)),
+      ]);
 
       if (cancelled) return;
-
       setIsLoading(false);
-    };
-
-    // eslint-disable-next-line prefer-const
-    timeout = setTimeout(initLoading, 50);
+    }, 0);
 
     return () => {
       cancelled = true;
-      clearTimeout(timeout);
-
-      if (unlockTimeout) clearTimeout(unlockTimeout);
+      clearTimeout(ticket);
     };
   }, [minLoadTime]);
 
-  const handleExitComplete = () => {
-    const html = document.documentElement;
-  };
-
-  //TODO: This FUCKING thing isnt working, fix this bullshit
-  //      the preloader loads twice, and doesnt wait for the animation to end before allowing scroll
+  const handleExitComplete = useCallback(() => {
+    document.documentElement.style.overflow = '';
+    lenis?.start();
+    setIsReady(true);
+  }, [lenis]);
 
   return (
-    <>
+    <PreloaderContext.Provider value={{ isLoading, isReady, registerResource }}>
       <main>{children}</main>
-      <AnimatedPresence show={isLoading} onExitComplete={handleExitComplete}>
-        <div className='flex-center h-dvh w-dvw overflow-hidden bg-amber-100'>
-          <div className='loading-body'>
-            <div className='loading-dots' />
-            <div className='loading-dots' />
-            <div className='loading-dots' />
-          </div>
-        </div>
-      </AnimatedPresence>
-    </>
+      <PreloaderOverlay show={isLoading} onExitComplete={handleExitComplete} />
+    </PreloaderContext.Provider>
   );
 }

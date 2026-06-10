@@ -1,7 +1,7 @@
 'use client';
 import HeroHeader, { LinkType } from '@/components/header';
 import Hero from '@/components/hero';
-import { useLenis } from '@/components/providers/LenisProvider';
+import { useLenis } from 'lenis/react';
 
 export default function Home() {
   const l = useLenis()?.progress;

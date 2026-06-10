@@ -1,6 +1,6 @@
 'use client';
 import Link from 'next/link';
-import { useLenis } from './providers/LenisProvider';
+import { useLenis } from 'lenis/react';
 import { useEffect, useRef, useState } from 'react';
 import gsap from 'gsap';
 import { useGSAP } from '@gsap/react';
@@ -47,7 +47,7 @@ export default function HeroHeader({ links }: HeaderProps) {
   return (
     <header
       ref={headerContainerRef}
-      className='flex justify-start md:justify-between items-top w-dvw fixed z-9999 top-0 left-0 md:px-[clamp(4rem,8vw+4rem,8rem)]'
+      className='flex justify-start md:justify-between items-top w-dvw fixed z-999 top-0 left-0 md:px-[clamp(4rem,8vw+4rem,8rem)]'
     >
       <h1 className='font-bold uppercase text-display text-amber-100 font-heading-serif'>
         conecta

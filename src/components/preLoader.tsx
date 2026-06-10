@@ -8,7 +8,7 @@ import {
   useRef,
   useCallback,
 } from 'react';
-import { useLenis } from './providers/LenisProvider';
+import { useLenis } from 'lenis/react';
 import { PreloaderContext } from './providers/PreloaderContext';
 import gsap from 'gsap';
 import { useGSAP } from '@gsap/react';

@@ -1,6 +1,6 @@
 'use client';
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { useLenis } from './providers/LenisProvider';
+import { useLenis } from 'lenis/react';
 
 export default function Scrollbar() {
   const lenis = useLenis();

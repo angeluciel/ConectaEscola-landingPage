@@ -57,7 +57,7 @@ function PreloaderOverlay({ show, onExitComplete }: OverlayProps) {
   if (!shouldRender) return null;
 
   return (
-    <div ref={containerRef} className='fixed inset-0 z-9999'>
+    <div ref={containerRef} className='fixed inset-0 z-50'>
       <div className='flex h-dvh w-dvw items-center justify-center overflow-hidden bg-amber-100'>
         <div className='loading-body'>
           <div className='loading-dots' />

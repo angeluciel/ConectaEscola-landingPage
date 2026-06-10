@@ -299,7 +299,7 @@ export function CustomScroll() {
 
   return (
     <div
-      className='fixed z-9999 w-[25dvw] hidden md:block h-dvh top-0 right-0 bottom-0'
+      className='fixed z-20 w-[25dvw] hidden md:block h-dvh top-0 right-0 bottom-0'
       onMouseEnter={hotzoneEnter}
       onMouseLeave={hotzoneLeave}
     >

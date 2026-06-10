@@ -121,7 +121,7 @@ export default function Hero() {
   }, [isReady]);
 
   return (
-    <section className={'relative h-dvh w-full overflow-x-hidden z-50'}>
+    <section className={'relative h-dvh w-full overflow-x-hidden z-1'}>
       <div>
         <div
           id='video-frame'

@@ -8,10 +8,10 @@ export default function Home() {
 
   const headerLinks: LinkType[] = [
     { name: 'Alunos', href: '/alunos' },
-    { name: 'Professores', href: '/alunos' },
-    { name: 'Pais', href: '/alunos' },
-    { name: 'Sobre', href: '/alunos' },
-    { name: 'Contato', href: '/alunos' },
+    { name: 'Professores', href: '/professores' },
+    { name: 'Pais', href: '/pais' },
+    { name: 'Sobre', href: '/sobre' },
+    { name: 'Contato', href: '/contato' },
   ];
 
   return (

@@ -21,14 +21,19 @@ export default function HeroHeader({ links }: HeaderProps) {
   const lenis = useLenis();
 
   const headerContainerRef = useRef<HTMLHeadingElement | null>(null);
+  const lastScrollY = useRef(0);
 
   useEffect(() => {
     if (!lenis) return;
 
-    const unsubscribe = lenis.on('scroll', ({ direction }) => {
-      setShow((current) => {
-        const shouldShow = direction !== 1;
+    const unsubscribe = lenis.on('scroll', ({ scroll }) => {
+      const delta = scroll - lastScrollY.current;
+      lastScrollY.current = scroll;
 
+      if (delta === 0) return;
+
+      setShow((current) => {
+        const shouldShow = delta < 0;
         return current === shouldShow ? current : shouldShow;
       });
     });

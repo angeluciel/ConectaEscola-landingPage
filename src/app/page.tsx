@@ -19,7 +19,9 @@ export default function Home() {
       <HeroHeader links={headerLinks} />
       <main className='flex w-full flex-col items-center justify-between sm:items-start bg-black/20 relative'>
         <Hero />
-        <section className='relative h-dvh w-full bg-amber-600'>{l}</section>
+        <section className='relative h-[500dvh] w-full bg-amber-600'>
+          {l}
+        </section>
       </main>
     </div>
   );

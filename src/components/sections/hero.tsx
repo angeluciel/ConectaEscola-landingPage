@@ -3,7 +3,7 @@ import { useEffect, useRef, useState } from 'react';
 import gsap from 'gsap';
 import { useGSAP } from '@gsap/react';
 import { SplitText } from 'gsap/SplitText';
-import { usePreloader } from './providers/PreloaderContext';
+import { usePreloader } from '../providers/PreloaderContext';
 
 const PRELOAD_LIMIT = 2;
 const TOTAL_VIDEOS = 2;
@@ -41,7 +41,7 @@ function waitForVideo(
   });
 }
 
-export default function Hero() {
+export function Hero() {
   const [currentIndex, setCurrentIndex] = useState(1);
   const { isReady, registerResource } = usePreloader();
 

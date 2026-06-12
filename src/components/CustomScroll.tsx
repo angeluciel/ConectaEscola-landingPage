@@ -268,13 +268,28 @@ export function CustomScroll() {
   );
 
   // #region ENTER-LEAVE fns
-  const hotzoneEnter = () => {
+  useEffect(() => {
+  const HOTZONE_WIDTH = window.innerWidth * 0.25;
+
+  const handlePointerMove = (event: PointerEvent) => {
     if (isDragging) return;
-    setIsHover(true);
+
+    const distanceFromRight = window.innerWidth - event.clientX;
+    setIsHover(distanceFromRight <= HOTZONE_WIDTH);
   };
-  const hotzoneLeave = () => {
-    setIsHover(false);
+
+  const handlePointerLeave = () => {
+    if (!isDragging) setIsHover(false);
   };
+
+  window.addEventListener('pointermove', handlePointerMove);
+  window.addEventListener('pointerleave', handlePointerLeave);
+
+  return () => {
+    window.removeEventListener('pointermove', handlePointerMove);
+    window.removeEventListener('pointerleave', handlePointerLeave);
+  };
+}, [isDragging]);
 
   const trackEnter = () => {
     if (isDragging) return;
@@ -295,17 +310,12 @@ export function CustomScroll() {
   };
   // #endregion
 
-  useEffect(() => {}, [lenis]);
-
   return (
     <div
-      className='fixed z-20 w-[25dvw] hidden md:block h-dvh top-0 right-0 bottom-0'
-      onMouseEnter={hotzoneEnter}
-      onMouseLeave={hotzoneLeave}
-    >
+      className='fixed z-20 w-[25dvw] hidden md:block h-dvh top-0 right-0 bottom-0 pointer-events-none'>
       {/* TRACK-HOTZONE */}
       <div
-        className='h-full absolute w-5 right-0 top-0'
+        className='h-full absolute w-5 right-0 top-0 pointer-events-auto'
         onMouseEnter={trackEnter}
         onMouseLeave={trackLeave}
       >

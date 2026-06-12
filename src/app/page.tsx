@@ -1,10 +1,15 @@
 'use client';
 import HeroHeader, { LinkType } from '@/components/header';
-import Hero from '@/components/hero';
+import { Hero, About } from '@/components/sections';
 import { useLenis } from 'lenis/react';
+import { useState } from 'react';
 
 export default function Home() {
-  const l = useLenis()?.progress;
+  const [mock, setMock] = useState(0);
+
+  useLenis(({ progress }) => {
+    setMock(progress);
+  })
 
   const headerLinks: LinkType[] = [
     { name: 'Alunos', href: '/alunos' },
@@ -19,8 +24,11 @@ export default function Home() {
       <HeroHeader links={headerLinks} />
       <main className='flex w-full flex-col items-center justify-between sm:items-start bg-black/20 relative'>
         <Hero />
-        <section className='relative h-[500dvh] w-full bg-amber-600'>
-          {l}
+        <About />
+        <section className='relative h-[500dvh] w-full bg-amber-600 pt-12 px-4'>
+          <div className='sticky top-0 h-screen flex items-start justify-start'>
+          {mock}
+          </div>
         </section>
       </main>
     </div>

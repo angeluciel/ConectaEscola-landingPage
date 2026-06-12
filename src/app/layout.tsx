@@ -8,7 +8,6 @@ import './globals.css';
 import 'lenis/dist/lenis.css';
 import { LenisProvider } from '@/components/providers/LenisProvider';
 import Preloader from '@/components/preLoader';
-import Scrollbar from '@/components/scrollbar';
 import { CustomScroll } from '@/components/CustomScroll';
 
 const geistMono = Geist_Mono({

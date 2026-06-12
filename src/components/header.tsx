@@ -52,7 +52,7 @@ export default function HeroHeader({ links }: HeaderProps) {
   return (
     <header
       ref={headerContainerRef}
-      className='flex justify-start md:justify-between items-top w-dvw fixed z-20 top-0 left-0 md:px-[clamp(4rem,8vw+4rem,8rem)]'
+      className='flex justify-start md:justify-between items-top w-dvw fixed z-20 top-0 left-0 md:px-[clamp(4rem,8vw+4rem,8rem)] pointer-events-none'
     >
       <h1 className='font-bold uppercase text-display text-amber-100 font-heading-serif'>
         conecta
@@ -62,7 +62,7 @@ export default function HeroHeader({ links }: HeaderProps) {
       </h1>
       <div className='hidden md:flex text-body pt-2 gap-2 lg:gap-6 items-center lg:items-top font-sans font-medium'>
         {links.map((link) => (
-          <Link key={link.href + link.name} href={link.href} title={link.name}>
+          <Link key={link.href + link.name} href={link.href} title={link.name} className='pointer-events-auto'>
             {link.name}
           </Link>
         ))}

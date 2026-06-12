@@ -1,10 +1,10 @@
 'use client';
 
-import Lenis from 'lenis';
+import { ReactLenis, type LenisRef } from 'lenis/react';
 import type { LenisOptions } from 'lenis';
-import { createContext, useContext, useEffect, useRef, useState } from 'react';
-
-const LenisContext = createContext<Lenis | null | undefined>(null);
+import { useContext, useEffect, useRef } from 'react';
+import gsap from 'gsap';
+import { ScrollTrigger } from 'gsap/ScrollTrigger';
 
 export function LenisProvider({
   children,
@@ -13,41 +13,45 @@ export function LenisProvider({
   children: React.ReactNode;
   options?: LenisOptions;
 }) {
-  const [lenis, setLenis] = useState<Lenis | null>(null);
   const optionsRef = useRef(options);
+  const lenisRef = useRef<LenisRef>(null);
+
+  useEffect(() => {
+    const lenis = lenisRef.current?.lenis;
+    lenis?.on('scroll', ScrollTrigger.update);
+
+    function update(time: number) {
+      lenisRef.current?.lenis?.raf(time * 1000);
+    }
+    gsap.ticker.add(update);
+
+    gsap.ticker.lagSmoothing(0);
+
+    return () => {
+      lenis?.off('scroll', ScrollTrigger.update);
+      gsap.ticker.remove(update);
+    };
+  }, []);
 
   useEffect(() => {
     optionsRef.current = options;
   }, [options]);
 
-  useEffect(() => {
-    const lenisInstance = new Lenis({
-      autoRaf: true,
-      duration: 1.2,
-      easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
-      touchMultiplier: 2,
-      infinite: false,
-      anchors: true,
-      syncTouch: false,
-      ...optionsRef.current,
-    });
-
-    setLenis(lenisInstance);
-
-    return () => {
-      lenisInstance.destroy();
-      setLenis(null);
-    };
-  }, []);
   return (
-    <LenisContext.Provider value={lenis}>{children}</LenisContext.Provider>
+    <ReactLenis
+      root
+      ref={lenisRef}
+      options={{
+        autoRaf: false,
+        duration: 1.2,
+        anchors: true,
+        touchMultiplier: 2,
+        syncTouch: false,
+        infinite: false,
+        ...options,
+      }}
+    >
+      {children}
+    </ReactLenis>
   );
-}
-
-export function useLenis() {
-  const context = useContext(LenisContext);
-  if (context === undefined) {
-    throw new Error('useLenis must be used within a LenisProvider');
-  }
-  return context;
 }

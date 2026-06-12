@@ -1,6 +1,6 @@
 'use client';
 import Link from 'next/link';
-import { useLenis } from './providers/LenisProvider';
+import { useLenis } from 'lenis/react';
 import { useEffect, useRef, useState } from 'react';
 import gsap from 'gsap';
 import { useGSAP } from '@gsap/react';
@@ -21,14 +21,19 @@ export default function HeroHeader({ links }: HeaderProps) {
   const lenis = useLenis();
 
   const headerContainerRef = useRef<HTMLHeadingElement | null>(null);
+  const lastScrollY = useRef(0);
 
   useEffect(() => {
     if (!lenis) return;
 
-    const unsubscribe = lenis.on('scroll', ({ direction }) => {
-      setShow((current) => {
-        const shouldShow = direction !== 1;
+    const unsubscribe = lenis.on('scroll', ({ scroll }) => {
+      const delta = scroll - lastScrollY.current;
+      lastScrollY.current = scroll;
 
+      if (delta === 0) return;
+
+      setShow((current) => {
+        const shouldShow = delta < 0;
         return current === shouldShow ? current : shouldShow;
       });
     });
@@ -47,7 +52,7 @@ export default function HeroHeader({ links }: HeaderProps) {
   return (
     <header
       ref={headerContainerRef}
-      className='flex justify-start md:justify-between items-top w-dvw fixed z-9999 top-0 left-0 md:px-[clamp(4rem,8vw+4rem,8rem)]'
+      className='flex justify-start md:justify-between items-top w-dvw fixed z-20 top-0 left-0 md:px-[clamp(4rem,8vw+4rem,8rem)] pointer-events-none'
     >
       <h1 className='font-bold uppercase text-display text-amber-100 font-heading-serif'>
         conecta
@@ -57,7 +62,7 @@ export default function HeroHeader({ links }: HeaderProps) {
       </h1>
       <div className='hidden md:flex text-body pt-2 gap-2 lg:gap-6 items-center lg:items-top font-sans font-medium'>
         {links.map((link) => (
-          <Link key={link.href + link.name} href={link.href}>
+          <Link key={link.href + link.name} href={link.href} title={link.name} className='pointer-events-auto'>
             {link.name}
           </Link>
         ))}
